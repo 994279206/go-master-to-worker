@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/gin-gonic/gin v1.8.1
+	github.com/satori/go.uuid v1.2.0
 	github.com/spf13/pflag v1.0.5
 	google.golang.org/grpc v1.50.1
 	google.golang.org/protobuf v1.28.1

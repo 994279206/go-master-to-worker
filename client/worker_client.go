@@ -6,9 +6,11 @@ import (
 	"go_grpc/core"
 	"go_grpc/util"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"log"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 type Worker struct {
@@ -22,7 +24,7 @@ func (w *Worker) Init() error {
 	var err error
 	clientAddress := fmt.Sprintf("%v:%v", util.Ip, util.GrpcPort)
 	log.Println(util.NodeName, "grpc address", clientAddress)
-	w.conn, err = grpc.Dial(clientAddress, grpc.WithInsecure())
+	w.conn, err = grpc.Dial(clientAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Panic(err)
 	}
@@ -32,10 +34,7 @@ func (w *Worker) Init() error {
 func (w *Worker) Start() {
 	log.Println("start worker node")
 	ctx := context.Background()
-	_, err := w.c.ReportStatus(ctx, &core.Request{})
-	if err != nil {
-		log.Panic(err)
-	}
+	go w.HeartBeat()
 	stream, _ := w.c.AssignTask(ctx, &core.Request{})
 	for {
 		res, err := stream.Recv()
@@ -48,6 +47,17 @@ func (w *Worker) Start() {
 		if err = exec.CommandContext(ctx, parts[0], parts[1:]...).Run(); err != nil {
 			log.Panic(err)
 		}
+	}
+}
+func (w *Worker) HeartBeat() {
+	uuid := util.HasUuid()
+	ctx := context.Background()
+	for {
+		_, err := w.c.ReportStatus(ctx, &core.Request{Action: uuid})
+		if err != nil {
+			log.Println(err)
+		}
+		time.Sleep(time.Duration(util.HeartBeatTime) * time.Second)
 	}
 }
 
