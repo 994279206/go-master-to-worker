@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"go_grpc/core"
 	"time"
 )
@@ -15,7 +14,7 @@ type NodeServer struct {
 }
 
 func (n *NodeServer) ReportStatus(ctx context.Context, request *core.Request) (*core.Response, error) {
-	uuid := request.Action
+	uuid := request.Uid
 	if uuid != "" {
 		if _, ok := n.Uid[uuid]; !ok {
 			n.Count += 1
@@ -23,7 +22,6 @@ func (n *NodeServer) ReportStatus(ctx context.Context, request *core.Request) (*
 		n.Uid[uuid] = time.Now().Unix()
 
 	}
-	fmt.Println(n.Count)
 	return &core.Response{Data: "ok"}, nil
 
 }

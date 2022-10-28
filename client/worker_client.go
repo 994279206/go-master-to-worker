@@ -53,7 +53,7 @@ func (w *Worker) HeartBeat() {
 	uuid := util.HasUuid()
 	ctx := context.Background()
 	for {
-		_, err := w.c.ReportStatus(ctx, &core.Request{Action: uuid})
+		_, err := w.c.ReportStatus(ctx, &core.Request{Uid: uuid})
 		if err != nil {
 			log.Println(err)
 		}
